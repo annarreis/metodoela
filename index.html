@@ -604,6 +604,23 @@ footer a.wpp:hover{color:#fff}
   #hero h1 .palavra span{transform:none}
   .grao{display:none}
 }
+
+/* ---------- performance mobile ---------- */
+@media(max-width:860px){
+  /* grão de filme animado em tela cheia = repaint constante → fora no mobile */
+  .grao{display:none!important}
+  /* blurs gigantes de GPU: reduz drasticamente o raio e para as animações */
+  .hero-luz .brilho{filter:blur(45px)!important;animation:none!important;opacity:.4!important;will-change:auto!important}
+  /* backdrop-filter é caro no mobile: troca por fundo sólido */
+  nav.solida{backdrop-filter:none!important;background:rgba(8,6,4,.94)!important}
+  #menu-mobile{backdrop-filter:none!important;background:rgba(8,6,4,.985)!important}
+  /* animações decorativas de loop que só custam bateria/FPS */
+  .txt-ouro{animation:none!important}
+  #wpp-float.on{animation:none!important}
+  .hero-hint .fio{animation:none!important}
+  /* evita camadas de composição desnecessárias */
+  .polly-foto img,.hist-trilho,.hero-luz .brilho{will-change:auto!important}
+}
 </style>
 </head>
 <body>
@@ -976,7 +993,7 @@ const semPin = reduzMotion || ehMobile;
 /* ============ INTRO → HERO ============ */
 const intro = document.getElementById('intro');
 window.addEventListener('load', ()=>{
-  const atraso = reduzMotion ? 200 : 2100;
+  const atraso = reduzMotion ? 200 : (ehMobile ? 1100 : 2100);
   setTimeout(()=>{
     intro.classList.add('some');
     if(reduzMotion) return;
@@ -1027,11 +1044,12 @@ atualizaScroll();
 
 /* ============ HERO ZOOM-OUT DO CONTEÚDO ============ */
 if(!reduzMotion){
-  gsap.to('.hero-conteudo',{
+  if(!ehMobile) gsap.to('.hero-conteudo',{
     scale:.86, opacity:0, filter:'blur(6px)', ease:'none',
     scrollTrigger:{trigger:'#hero', start:'top top', end:'75% top', scrub:.5}
   });
-  gsap.to('.hero-luz',{
+  // parallax das luzes borradas só no desktop (blur animado no scroll trava o mobile)
+  if(!ehMobile) gsap.to('.hero-luz',{
     yPercent:22, scale:1.15, opacity:.25, ease:'none',
     scrollTrigger:{trigger:'#hero', start:'top top', end:'bottom top', scrub:.6}
   });
@@ -1135,7 +1153,7 @@ if(!reduzMotion && matchMedia('(pointer:fine)').matches){
 }
 
 /* ============ MARCA D'ÁGUA POLLY — PARALLAX ============ */
-if(!reduzMotion){
+if(!reduzMotion && !ehMobile){
   gsap.to('#polly .marca-agua',{yPercent:-18, ease:'none',
     scrollTrigger:{trigger:'#polly', start:'top bottom', end:'bottom top', scrub:.8}});
   gsap.fromTo('.polly-foto img',{scale:1.12,yPercent:-4},{scale:1,yPercent:4,ease:'none',
