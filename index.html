@@ -130,7 +130,37 @@ nav.solida{
   transition:all .4s;
 }
 .nav-cta:hover{background:var(--champagne);color:var(--preto);border-color:var(--champagne)}
-@media(max-width:860px){.nav-links a:not(.nav-cta){display:none}}
+
+/* hambúrguer + menu mobile */
+.nav-toggle{
+  display:none;flex-direction:column;justify-content:center;gap:5px;
+  width:44px;height:44px;padding:0;border:0;background:transparent;cursor:pointer;
+  margin-left:1rem;
+}
+.nav-toggle span{display:block;width:24px;height:1.5px;background:var(--off);margin:0 auto;transition:transform .4s cubic-bezier(.25,.6,.3,1),opacity .3s}
+body.menu-aberto .nav-toggle span:nth-child(1){transform:translateY(6.5px) rotate(45deg)}
+body.menu-aberto .nav-toggle span:nth-child(2){opacity:0}
+body.menu-aberto .nav-toggle span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg)}
+#menu-mobile{
+  position:fixed;inset:0;z-index:79;background:rgba(8,6,4,.97);backdrop-filter:blur(20px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2.2rem;
+  opacity:0;visibility:hidden;transition:opacity .5s ease,visibility .5s;
+}
+body.menu-aberto{overflow:hidden}
+body.menu-aberto #menu-mobile{opacity:1;visibility:visible}
+#menu-mobile a{
+  font-family:var(--serif);font-size:1.7rem;letter-spacing:.02em;color:var(--off);
+  text-decoration:none;font-weight:400;
+}
+#menu-mobile a.nav-cta{
+  font-family:var(--sans);font-size:11px;letter-spacing:.26em;text-transform:uppercase;
+  color:var(--champagne);border:1px solid rgba(194,155,94,.5);padding:.9rem 2rem;margin-top:1rem;
+}
+@media(max-width:860px){
+  .nav-links{display:none}
+  .nav-toggle{display:flex}
+}
+@media(min-width:861px){#menu-mobile{display:none}}
 
 /* ---------- botões ---------- */
 .btn{
@@ -600,8 +630,19 @@ footer a.wpp:hover{color:#fff}
       <a href="#historias">Histórias</a>
       <a class="nav-cta" href="#aula">Aula gratuita</a>
     </div>
+    <button class="nav-toggle" id="nav-toggle" aria-label="Abrir menu" aria-expanded="false" aria-controls="menu-mobile">
+      <span></span><span></span><span></span>
+    </button>
   </div>
 </nav>
+
+<!-- ============ MENU MOBILE ============ -->
+<div id="menu-mobile">
+  <a href="#metodo">O Método</a>
+  <a href="#polly">A Polly</a>
+  <a href="#historias">Histórias</a>
+  <a class="nav-cta" href="#aula">Aula gratuita</a>
+</div>
 
 <!-- ============ HERO ============ -->
 <header id="hero">
@@ -924,7 +965,13 @@ footer a.wpp:hover{color:#fff}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script>
 gsap.registerPlugin(ScrollTrigger);
+// evita que a barra de endereço do mobile (que muda a altura da viewport)
+// dispare recálculos e faça o scroll "pular" nas seções pinadas
+ScrollTrigger.config({ ignoreMobileResize: true });
 const reduzMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+// no mobile desligamos as seções pinadas/scroll-horizontal (fonte dos travamentos)
+const ehMobile = window.matchMedia('(max-width: 860px)').matches;
+const semPin = reduzMotion || ehMobile;
 
 /* ============ INTRO → HERO ============ */
 const intro = document.getElementById('intro');
@@ -957,6 +1004,26 @@ function atualizaScroll(){
 window.addEventListener('scroll', atualizaScroll, {passive:true});
 window.addEventListener('resize', atualizaScroll, {passive:true});
 atualizaScroll();
+
+/* ============ MENU MOBILE ============ */
+(function(){
+  const toggle = document.getElementById('nav-toggle');
+  const menu = document.getElementById('menu-mobile');
+  if(!toggle) return;
+  const fechar = ()=>{
+    document.body.classList.remove('menu-aberto');
+    toggle.setAttribute('aria-expanded','false');
+    toggle.setAttribute('aria-label','Abrir menu');
+  };
+  toggle.addEventListener('click', ()=>{
+    const abrir = !document.body.classList.contains('menu-aberto');
+    document.body.classList.toggle('menu-aberto', abrir);
+    toggle.setAttribute('aria-expanded', abrir ? 'true' : 'false');
+    toggle.setAttribute('aria-label', abrir ? 'Fechar menu' : 'Abrir menu');
+  });
+  menu.querySelectorAll('a').forEach(a=>a.addEventListener('click', fechar));
+  window.addEventListener('resize', ()=>{ if(window.innerWidth>860) fechar(); }, {passive:true});
+})();
 
 /* ============ HERO ZOOM-OUT DO CONTEÚDO ============ */
 if(!reduzMotion){
@@ -1002,7 +1069,7 @@ document.querySelectorAll('.contador').forEach(el=>{
 (function(){
   const dores = gsap.utils.toArray('.dor');
   const pontos = document.querySelectorAll('.dores-progresso i');
-  if(reduzMotion){
+  if(semPin){
     // sem pin: empilha as frases
     const palco = document.querySelector('.dores-palco');
     palco.style.height='auto'; palco.style.padding='6rem 6vw';
@@ -1078,7 +1145,7 @@ if(!reduzMotion){
 /* ============ HISTÓRIAS — SCROLL HORIZONTAL ============ */
 (function(){
   const trilho = document.getElementById('hist-trilho');
-  if(reduzMotion){
+  if(semPin){
     trilho.style.overflowX='auto';
     document.querySelector('.hist-pin').style.height='auto';
     document.querySelector('.hist-pin').style.padding='6rem 0';
