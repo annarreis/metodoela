@@ -621,18 +621,13 @@ body.menu-aberto #menu-mobile{opacity:1;visibility:visible}
 .obj-corpo-in{padding:0 3.4rem 2rem 0;color:#6E6555;font-size:1rem;line-height:1.7}
 @media(max-width:640px){.obj-corpo-in{padding-right:1rem}}
 
-
-  background:var(--preto);min-height:120svh;position:relative;
+/* ---------- finale ---------- */
+#finale{
+  background:var(--preto);min-height:100svh;position:relative;
   display:flex;align-items:center;justify-content:center;text-align:center;
   padding:12rem 6vw;overflow:hidden;
 }
-#finale .tri-finale{
-  position:absolute;left:50%;top:50%;
-  width:min(58vw,560px);height:auto;
-  transform:translate(-50%,-50%) scale(5);
-  opacity:0;pointer-events:none;will-change:transform,opacity;
-}
-#finale .conteudo{position:relative;z-index:2;max-width:820px}
+#finale .conteudo{position:relative;z-index:2;max-width:820px;margin:0 auto;width:100%}
 #finale h2{font-size:clamp(2.6rem,6.4vw,5.4rem);max-width:16ch;margin:2rem auto 0}
 #finale h2 em{color:var(--champagne)}
 #finale .lead{max-width:56ch;margin:2.4rem auto 0;color:var(--texto-claro);font-size:1.05rem}
@@ -1106,9 +1101,6 @@ footer a.wpp:hover{color:#fff}
 
 <!-- ============ FINALE ============ -->
 <section id="finale">
-  <svg class="tri-finale" viewBox="0 0 74 68" fill="none" aria-hidden="true">
-    <path d="M37 4 70 64H4L37 4Z" stroke="#C29B5E" stroke-width="1.2" stroke-linejoin="round"/>
-  </svg>
   <div class="conteudo">
     <span class="eyebrow rv">Jornada ELA</span>
     <h2 class="rv">Uma nova forma de <em>viver.</em></h2>
@@ -1339,15 +1331,6 @@ if(!reduzMotion && !ehMobile){
       pin:true, scrub:.6, invalidateOnRefresh:true
     }});
 })();
-
-/* ============ FINALE — TRIÂNGULO ZOOM-OUT ============ */
-if(!reduzMotion){
-  gsap.fromTo('.tri-finale',
-    {scale:5.2, opacity:0, rotate:-8},
-    {scale:1, opacity:.5, rotate:0, ease:'none',
-      scrollTrigger:{trigger:'#finale', start:'top 90%', end:'center center', scrub:.6}}
-  );
-}
 
 /* ============ ACORDEÃO DE OBJEÇÕES ============ */
 document.querySelectorAll('.obj').forEach(item=>{
